@@ -9,15 +9,33 @@ namespace Funsafe.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write<T>(ref T blittableStruct) where T : struct
         {
+#if USE_ILHELPERS_WRITE
+            ILHelpers.Write(ref _cursor, ref blittableStruct);
+#elif USE_IL_HELPER_WRITE2
+            _cursor = ILHelpers.Write2(_cursor, ref blittableStruct);
+#else
             _cursor = AccessorRegistry<T>.Write(_cursor, ref blittableStruct);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Read<T>() where T : struct
         {
+#if USE_ILHELPERS_READ
             T item;
             _cursor = AccessorRegistry<T>.Read(_cursor, out item);
             return item;
+#elif USE_IL_HELPER_READ2
+            T item;
+            _cursor = ILHelpers.Read2(_cursor, out item);
+            return item;
+#elif USE_IL_HELPER_READ3
+            return ILHelpers.Read3<T>(ref _cursor);
+#else
+            T item;
+            _cursor = AccessorRegistry<T>.Read(_cursor, out item);
+            return item;
+#endif
         }
 
         public static void PrepareAccessorFor<T>()
