@@ -12,34 +12,48 @@ namespace Funsafe.Runner
         {
             const int warmupBatchCount = 100;
             const int warmupBatchSize = 10;
-            
-            BenchBinarySerialization(warmupBatchCount, warmupBatchSize);
-            BenchUnsafeSerialization(warmupBatchCount, warmupBatchSize);
+
+            BenchBinarySerialization(warmupBatchCount, warmupBatchSize, 1);
+            BenchBinaryDeserialization(warmupBatchCount, warmupBatchSize, 1);
+
+            BenchUnsafeSerialization(warmupBatchCount, warmupBatchSize, 1);
+            BenchUnsafeDeserialization(warmupBatchCount, warmupBatchSize, 1);
 
             const int batchCount = 100*1000;
             const int batchSize = 100;
 
-            Measure("Binary serialization", () => BenchBinarySerialization(batchCount, batchSize), batchCount*batchSize);
-            Measure("Unsafe binary serialization", () => BenchUnsafeSerialization(batchCount, batchSize), batchCount*batchSize);
+            for (var i = 0; i <= 10; i += 2)
+            {
+                var messagePartCount = i;
+                var operationCount = batchCount*batchSize;
+
+                Console.WriteLine("# {0} message parts", messagePartCount);
+                Console.WriteLine();
+                Measure("Binary serialization", () => BenchBinarySerialization(batchCount, batchSize, messagePartCount), operationCount);
+                Measure("Binary deserialization", () => BenchBinaryDeserialization(batchCount, batchSize, messagePartCount), operationCount);
+                Console.WriteLine();
+                Measure("Unsafe serialization", () => BenchUnsafeSerialization(batchCount, batchSize, messagePartCount), operationCount);
+                Measure("Unsafe deserialization", () => BenchUnsafeDeserialization(batchCount, batchSize, messagePartCount), operationCount);
+                Console.WriteLine();
+            }
         }
 
         private static void Measure(string actionName, Action action, int operationCount)
         {
-            Console.WriteLine("{0} - Starting measure...", actionName);
             GC.Collect();
             var gcCount = GC.CollectionCount(0);
             var stopwatch = Stopwatch.StartNew();
             action();
             stopwatch.Stop();
             gcCount = GC.CollectionCount(0) - gcCount;
-            Console.WriteLine("Completed in {0:N0}ms ({1:N0} ops/s) - GC count: {2}", stopwatch.ElapsedMilliseconds, operationCount/stopwatch.Elapsed.TotalSeconds, gcCount);
+            Console.WriteLine("{0}\t{1,10:N0}ms\t{2,12:N0} ops/s\t{3}GC", actionName, stopwatch.ElapsedMilliseconds, operationCount/stopwatch.Elapsed.TotalSeconds, gcCount);
         }
 
-        private static void BenchUnsafeSerialization(int batchCount, int batchSize)
+        private static void BenchUnsafeSerialization(int batchCount, int batchSize, int messagePartCount)
         {
             using (var wrapper = new UnsafeBufferWrapper(new byte[1024*100]))
             {
-                var message = CreateMessage();
+                var message = CreateMessage(messagePartCount);
 
                 for (var i = 0; i < batchCount; i++)
                 {
@@ -49,7 +63,23 @@ namespace Funsafe.Runner
                     {
                         UnsafeMessageSerializer.Serialize(message, wrapper);
                     }
+                }
+            }
+        }
 
+        private static void BenchUnsafeDeserialization(int batchCount, int batchSize, int messagePartCount)
+        {
+            using (var wrapper = new UnsafeBufferWrapper(new byte[1024*100]))
+            {
+                var message = CreateMessage(messagePartCount);
+
+                for (var j = 0; j < batchSize; j++)
+                {
+                    UnsafeMessageSerializer.Serialize(message, wrapper);
+                }
+
+                for (var i = 0; i < batchCount; i++)
+                {
                     wrapper.ResetCursor();
 
                     for (var j = 0; j < batchSize; j++)
@@ -60,13 +90,12 @@ namespace Funsafe.Runner
             }
         }
 
-        private static void BenchBinarySerialization(int batchCount, int batchSize)
+        private static void BenchBinarySerialization(int batchCount, int batchSize, int messagePartCount)
         {
             using (var memoryStream = new MemoryStream(new byte[1024*100]))
             using (var binaryWriter = new BinaryWriter(memoryStream))
-            using (var binaryReader = new BinaryReader(memoryStream))
             {
-                var message = CreateMessage();
+                var message = CreateMessage(messagePartCount);
 
                 for (var i = 0; i < batchCount; i++)
                 {
@@ -76,7 +105,25 @@ namespace Funsafe.Runner
                     {
                         BinaryMessageSerializer.Serialize(message, binaryWriter);
                     }
+                }
+            }
+        }
 
+        private static void BenchBinaryDeserialization(int batchCount, int batchSize, int messagePartCount)
+        {
+            using (var memoryStream = new MemoryStream(new byte[1024*100]))
+            using (var binaryWriter = new BinaryWriter(memoryStream))
+            using (var binaryReader = new BinaryReader(memoryStream))
+            {
+                var message = CreateMessage(messagePartCount);
+
+                for (var j = 0; j < batchSize; j++)
+                {
+                    BinaryMessageSerializer.Serialize(message, binaryWriter);
+                }
+
+                for (var i = 0; i < batchCount; i++)
+                {
                     memoryStream.Position = 0;
 
                     for (var j = 0; j < batchSize; j++)
@@ -87,7 +134,7 @@ namespace Funsafe.Runner
             }
         }
 
-        private static Message CreateMessage()
+        private static Message CreateMessage(int messagePartCount)
         {
             var message = new Message
             {
@@ -99,7 +146,7 @@ namespace Funsafe.Runner
                     Timestamp = DateTime.UtcNow
                 },
                 Id = 123,
-                PartCount = 12
+                PartCount = messagePartCount
             };
 
             for (var i = 0; i < message.PartCount; i++)
