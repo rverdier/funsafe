@@ -5,6 +5,6 @@
         public Header Header;
         public int Id;
         public int PartCount;
-        public MessagePart[] Parts = new MessagePart[256];
+        public readonly MessagePart[] Parts = new MessagePart[256];
     }
 }
