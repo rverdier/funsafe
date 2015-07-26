@@ -3,9 +3,9 @@ using Funsafe.Runner.Serializers;
 
 namespace Funsafe.Runner.Benches
 {
-    internal class UnsafeBufferWrapperDeserializerBench : Bench
+    internal class UnsafeBufferWrapperSerializerBench4 : Bench
     {
-        public override BenchCategory Category { get { return BenchCategory.Deserialization; } }
+        public override BenchCategory Category { get { return BenchCategory.Serialization; } }
 
         protected override void DoRun(int batchCount, int batchSize, int messagePartCount)
         {
@@ -13,18 +13,13 @@ namespace Funsafe.Runner.Benches
             {
                 var message = CreateMessage(messagePartCount);
 
-                for (var j = 0; j < batchSize; j++)
-                {
-                    UnsafeBufferWrapperSerializer4.Serialize(message, wrapper);
-                }
-
                 for (var i = 0; i < batchCount; i++)
                 {
                     wrapper.ResetCursor();
 
                     for (var j = 0; j < batchSize; j++)
                     {
-                        UnsafeBufferWrapperDeserializer.Deserialize(message, wrapper);
+                        UnsafeBufferWrapperSerializer4.Serialize(message, wrapper);
                     }
                 }
             }

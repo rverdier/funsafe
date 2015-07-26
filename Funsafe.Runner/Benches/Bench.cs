@@ -8,6 +8,8 @@ namespace Funsafe.Runner.Benches
     {
         public virtual string Name { get { return GetType().Name; } }
 
+        public abstract BenchCategory Category { get; }
+
         public BenchResult Run(int batchCount, int batchSize, int messagePartCount)
         {
             GC.Collect();

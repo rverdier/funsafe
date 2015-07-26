@@ -1,19 +1,21 @@
-﻿using Funsafe.Buffers;
+using Funsafe.Buffers;
 using Funsafe.Runner.Model;
 
 namespace Funsafe.Runner.Serializers
 {
-    public class UnsafeBufferWrapperSerializer
+    public unsafe class UnsafeBufferWrapperSerializer4
     {
         public static void Serialize(Message instance, UnsafeBufferWrapper wrapper)
         {
-            wrapper.Write(ref instance.Header);
+            *(Header*)wrapper.Cursor = instance.Header;
+            wrapper.Cursor += sizeof(Header);
             wrapper.Write(instance.Id);
             wrapper.Write(instance.PartCount);
 
             for (var i = 0; i < instance.PartCount; i++)
             {
-                wrapper.Write(ref instance.Parts[i]);
+                *(MessagePart*)wrapper.Cursor = instance.Parts[i];
+                wrapper.Cursor += sizeof(MessagePart);
             }
         }
     }

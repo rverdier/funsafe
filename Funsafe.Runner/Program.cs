@@ -20,9 +20,24 @@ namespace Funsafe.Runner
                 bench.Run(warmupBatchCount, warmupBatchSize, warmupMessagePartCount);
             }
 
+            Console.WriteLine("Serialization");
+            Console.WriteLine("-------------");
+            Console.WriteLine();
+
+            RunBenches(benches, BenchCategory.Serialization);
+
+            Console.WriteLine();
+            Console.WriteLine("Deserialization");
+            Console.WriteLine("---------------");
+            Console.WriteLine();
+
+            RunBenches(benches, BenchCategory.Deserialization);
+        }
+
+        private static void RunBenches(IList<Bench> benches, BenchCategory benchCategory)
+        {
             const int batchCount = 100 * 1000;
             const int batchSize = 100;
-
             for (var i = 0; i <= 10; i += 2)
             {
                 var messagePartCount = i;
@@ -31,9 +46,15 @@ namespace Funsafe.Runner
                 Console.WriteLine("# {0} message parts", messagePartCount);
                 Console.WriteLine();
 
-                foreach (var bench in benches)
+                var results = new List<BenchResult>();
+
+                foreach (var bench in benches.Where(x => x.Category == benchCategory))
                 {
-                    var result = bench.Run(batchCount, batchSize, messagePartCount);
+                    results.Add(bench.Run(batchCount, batchSize, messagePartCount));
+                }
+
+                foreach (var result in results.OrderByDescending(x => x.OperationPerSecond))
+                {
                     Console.WriteLine(result);
                 }
             }
@@ -43,8 +64,10 @@ namespace Funsafe.Runner
         {
             return (from type in typeof(Program).Assembly.GetTypes()
                     where typeof(Bench).IsAssignableFrom(type) && !type.IsAbstract
-                    orderby type.Name 
-                    select (Bench)Activator.CreateInstance(type)).ToList();
+                    orderby type.Name
+                    let instance = (Bench)Activator.CreateInstance(type)
+                    where instance.Category != BenchCategory.Ignored
+                    select instance).ToList();
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Funsafe.Runner.Benches
 
         public override string ToString()
         {
-            return string.Format("{0,50}\t{1,10:N0}ms\t{2,12:N0} ops/s\t{3}GC", BenchName, Elapsed.TotalMilliseconds, OperationPerSecond, GCCount);
+            return string.Format("{0,50}\t{1,10:N0} ms\t{2,12:N0} ops/s\t{3} GC", BenchName, Elapsed.TotalMilliseconds, OperationPerSecond, GCCount);
         }
     }
 }

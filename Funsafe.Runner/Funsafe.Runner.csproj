@@ -49,20 +49,35 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Benches\Bench.cs" />
+    <Compile Include="Benches\BenchCategory.cs" />
     <Compile Include="Benches\BenchResult.cs" />
     <Compile Include="Benches\BinaryReaderDeserializerBench.cs" />
     <Compile Include="Benches\BinaryWriterSerializerBench.cs" />
+    <Compile Include="Benches\UnsafeBufferWrapperDeserializerBench2.cs" />
+    <Compile Include="Benches\UnsafeBufferWrapperDeserializerBench3.cs" />
+    <Compile Include="Benches\UnsafeBufferWrapperDeserializerBench4.cs" />
+    <Compile Include="Benches\UnsafeBufferWrapperDeserializerBench5.cs" />
+    <Compile Include="Benches\UnsafeBufferWrapperSerializerBench2.cs" />
+    <Compile Include="Benches\UnsafeBufferWrapperSerializerBench3.cs" />
+    <Compile Include="Benches\UnsafeBufferWrapperSerializerBench4.cs" />
     <Compile Include="Serializers\BinaryReaderDeserializer.cs" />
     <Compile Include="Serializers\BinaryWriterSerializer.cs" />
     <Compile Include="Model\Header.cs" />
     <Compile Include="Model\Message.cs" />
     <Compile Include="Model\MessagePart.cs" />
+    <Compile Include="Serializers\UnsafeBufferWrapperDeserializer2.cs" />
+    <Compile Include="Serializers\UnsafeBufferWrapperDeserializer3.cs" />
+    <Compile Include="Serializers\UnsafeBufferWrapperDeserializer4.cs" />
+    <Compile Include="Serializers\UnsafeBufferWrapperDeserializer5.cs" />
     <Compile Include="Serializers\UnsafeBufferWrapperSerializer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serializers\UnsafeBufferWrapperDeserializer.cs" />
     <Compile Include="Benches\UnsafeBufferWrapperDeserializerBench.cs" />
     <Compile Include="Benches\UnsafeBufferWrapperSerializerBench.cs" />
+    <Compile Include="Serializers\UnsafeBufferWrapperSerializer2.cs" />
+    <Compile Include="Serializers\UnsafeBufferWrapperSerializer3.cs" />
+    <Compile Include="Serializers\UnsafeBufferWrapperSerializer4.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

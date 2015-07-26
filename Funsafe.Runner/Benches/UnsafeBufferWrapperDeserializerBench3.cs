@@ -1,32 +1,30 @@
-using System.IO;
+using Funsafe.Buffers;
 using Funsafe.Runner.Serializers;
 
 namespace Funsafe.Runner.Benches
 {
-    internal class BinaryReaderDeserializerBench : Bench
+    internal class UnsafeBufferWrapperDeserializerBench3 : Bench
     {
         public override BenchCategory Category { get { return BenchCategory.Deserialization; } }
 
         protected override void DoRun(int batchCount, int batchSize, int messagePartCount)
         {
-            using (var memoryStream = new MemoryStream(new byte[1024 * 100]))
-            using (var binaryWriter = new BinaryWriter(memoryStream))
-            using (var binaryReader = new BinaryReader(memoryStream))
+            using (var wrapper = new UnsafeBufferWrapper(new byte[1024 * 100]))
             {
                 var message = CreateMessage(messagePartCount);
 
                 for (var j = 0; j < batchSize; j++)
                 {
-                    BinaryWriterSerializer.Serialize(message, binaryWriter);
+                    UnsafeBufferWrapperSerializer4.Serialize(message, wrapper);
                 }
 
                 for (var i = 0; i < batchCount; i++)
                 {
-                    memoryStream.Position = 0;
+                    wrapper.ResetCursor();
 
                     for (var j = 0; j < batchSize; j++)
                     {
-                        BinaryReaderDeserializer.Deserialize(message, binaryReader);
+                        UnsafeBufferWrapperDeserializer3.Deserialize(message, wrapper);
                     }
                 }
             }

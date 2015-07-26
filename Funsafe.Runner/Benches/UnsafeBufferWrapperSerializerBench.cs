@@ -5,6 +5,8 @@ namespace Funsafe.Runner.Benches
 {
     internal class UnsafeBufferWrapperSerializerBench : Bench
     {
+        public override BenchCategory Category { get { return BenchCategory.Serialization; } }
+
         protected override void DoRun(int batchCount, int batchSize, int messagePartCount)
         {
             using (var wrapper = new UnsafeBufferWrapper(new byte[1024 * 100]))
